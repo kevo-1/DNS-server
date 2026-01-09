@@ -18,32 +18,19 @@ func ParseURL(url string) models.URL {
 		parsedURL.Scheme = "https"
 	}
 
-	// Step 2: Extract User Info (username:password@)
-	if idx := strings.Index(remaining, "@"); idx != -1 {
-		userInfo := remaining[:idx]
-		remaining = remaining[idx+1:] // Skip "@"
-		
-		if colonIdx := strings.Index(userInfo, ":"); colonIdx != -1 {
-			parsedURL.Authority.Username = userInfo[:colonIdx]
-			parsedURL.Authority.Password = userInfo[colonIdx+1:]
-		} else {
-			parsedURL.Authority.Username = userInfo
-		}
-	}
-
-	// Step 3: Extract Fragment
+	// Step 2: Extract Fragment
 	if idx := strings.Index(remaining, "#"); idx != -1 {
 		parsedURL.Fragment = remaining[idx+1:]
 		remaining = remaining[:idx]
 	}
 
-	// Step 4: Extract Query String
+	// Step 3: Extract Query String
 	if idx := strings.Index(remaining, "?"); idx != -1 {
 		parsedURL.Query = remaining[idx+1:]
 		remaining = remaining[:idx]
 	}
 
-	// Step 5: Extract Path
+	// Step 4: Extract Path
 	if idx := strings.Index(remaining, "/"); idx != -1 {
 		parsedURL.Path = remaining[idx:] // Include the leading /
 		remaining = remaining[:idx]
@@ -52,7 +39,7 @@ func ParseURL(url string) models.URL {
 		parsedURL.Path = "/"
 	}
 
-	// Step 6: Extract Host and Port
+	// Step 5: Extract Host and Port
 	hostPort := remaining
 	
 	// Check for IPv6 (enclosed in brackets)

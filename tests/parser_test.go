@@ -13,14 +13,6 @@ func assertEqual(t *testing.T, got, want models.URL) {
 		t.Errorf("Scheme: got %q, want %q", got.Scheme, want.Scheme)
 	}
 
-	if got.Authority.Username != want.Authority.Username {
-		t.Errorf("Username: got %q, want %q", got.Authority.Username, want.Authority.Username)
-	}
-
-	if got.Authority.Password != want.Authority.Password {
-		t.Errorf("Password: got %q, want %q", got.Authority.Password, want.Authority.Password)
-	}
-
 	if got.Authority.Host != want.Authority.Host {
 		t.Errorf("Host: got %q, want %q", got.Authority.Host, want.Authority.Host)
 	}
@@ -48,8 +40,6 @@ func TestFullURL(t *testing.T) {
 	expected := models.URL{
 		Scheme: "https",
 		Authority: models.Authority{
-			Username: "username",
-			Password: "password",
 			Host:     "api.example.com",
 			Port:     "8443",
 		},
@@ -67,8 +57,6 @@ func TestNoAuthURL(t *testing.T) {
 	expected := models.URL{
 		Scheme: "https",
 		Authority: models.Authority{
-			Username: "",
-			Password: "",
 			Host:     "api.example.com",
 			Port:     "8443",
 		},
@@ -86,8 +74,6 @@ func TestDefaultURL(t *testing.T) {
 	expected := models.URL{
 		Scheme: "https",
 		Authority: models.Authority{
-			Username: "",
-			Password: "",
 			Host:     "api.example.com",
 			Port:     "443",
 		},
@@ -105,8 +91,6 @@ func TestLocalURL(t *testing.T) {
 	expected := models.URL{
 		Scheme: "ftp",
 		Authority: models.Authority{
-			Username: "",
-			Password: "",
 			Host:     "ftp.example.com",
 			Port:     "21",
 		},
