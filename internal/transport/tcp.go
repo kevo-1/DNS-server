@@ -7,19 +7,19 @@ import (
 	"net"
 )
 
-type TCPServer struct {
+type TCPTransport struct {
 	addr    string
 	handler func([]byte) ([]byte, error)
 }
 
-func NewTCPServer(addr string, handler func([]byte) ([]byte, error)) *TCPServer {
-	return &TCPServer{
+func NewTCPTransport(addr string, handler func([]byte) ([]byte, error)) *TCPTransport {
+	return &TCPTransport{
 		addr:    addr,
 		handler: handler,
 	}
 }
 
-func (s *TCPServer) ListenAndServe(ctx context.Context) error {
+func (s *TCPTransport) Start(ctx context.Context) error {
 	listener, err := net.Listen("tcp", s.addr)
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func (s *TCPServer) ListenAndServe(ctx context.Context) error {
 	}
 }
 
-func (s *TCPServer) handleConnection(conn net.Conn) {
+func (s *TCPTransport) handleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	lengthBuf := make([]byte, 2)
@@ -96,7 +96,7 @@ func (s *TCPServer) handleConnection(conn net.Conn) {
 	}
 }
 
-func (s *TCPServer) writeMessage(conn net.Conn, data []byte) error {
+func (s *TCPTransport) writeMessage(conn net.Conn, data []byte) error {
 	length := len(data)
 	lengthBuf := []byte{byte(length >> 8), byte(length & 0xFF)}
 
