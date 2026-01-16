@@ -1,7 +1,7 @@
 package tests
 
 import (
-	core "DNS-server/core"
+	parser "DNS-server/pkg/parser"
 	models "DNS-server/models"
 	"testing"
 )
@@ -35,7 +35,7 @@ func assertEqual(t *testing.T, got, want models.URL) {
 }
 
 func TestFullURL(t *testing.T) {
-	parsedURL := core.ParseURL("https://username:password@api.example.com:8443/v2/users/search?name=john&active=true#results")
+	parsedURL := parser.ParseURL("https://username:password@api.example.com:8443/v2/users/search?name=john&active=true#results")
 	
 	expected := models.URL{
 		Scheme: "https",
@@ -52,7 +52,7 @@ func TestFullURL(t *testing.T) {
 }
 
 func TestNoAuthURL(t *testing.T) {
-	parsedURL := core.ParseURL("https://api.example.com:8443/v2/users/search?name=john&active=true#results")
+	parsedURL := parser.ParseURL("https://api.example.com:8443/v2/users/search?name=john&active=true#results")
 	
 	expected := models.URL{
 		Scheme: "https",
@@ -69,7 +69,7 @@ func TestNoAuthURL(t *testing.T) {
 }
 
 func TestDefaultURL(t *testing.T) {
-	parsedURL := core.ParseURL("https://api.example.com/v2/users")
+	parsedURL := parser.ParseURL("https://api.example.com/v2/users")
 	
 	expected := models.URL{
 		Scheme: "https",
@@ -86,7 +86,7 @@ func TestDefaultURL(t *testing.T) {
 }
 
 func TestLocalURL(t *testing.T) {
-	parsedURL := core.ParseURL("ftp://ftp.example.com/readme.md")
+	parsedURL := parser.ParseURL("ftp://ftp.example.com/readme.md")
 	
 	expected := models.URL{
 		Scheme: "ftp",
