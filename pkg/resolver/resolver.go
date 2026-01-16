@@ -1,4 +1,4 @@
-package core
+package resolver
 
 import (
 	"DNS-server/models"
