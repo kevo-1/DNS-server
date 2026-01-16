@@ -1,31 +1,21 @@
 package resolver
 
 import (
+	"DNS-server/internal/protocol"
 	"DNS-server/models"
-	"strings"
+	"errors"
 	"sync"
 )
 
+var (
+	ErrResolutionFailed = errors.New("DNS resolution failed")
+	ErrInvalidDomain    = errors.New("invalid domain name")
+)
+
 type Resolver struct {
-	cache map[string]string
-	mu    sync.Mutex
-}
-
-func (r *Resolver) lookupCache(domain string) (string, bool) {
-	//lock the cache as it is a critical section
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	if ip, ok := r.cache[domain]; ok {
-		return ip, true
-	}
-	return "", false
-}
-
-func (r *Resolver) updateCache(domain, ip string) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	r.cache[domain] = ip
+	cache              *DNSCache
+	iterativeResolver  *IterativeResolver
+	mu                 sync.RWMutex
 }
 
 var (
@@ -35,20 +25,66 @@ var (
 
 func GetInstance() *Resolver {
 	once.Do(func() {
+		cache := NewDNSCache(models.DefaultCacheConfig())
 		instance = &Resolver{
-			cache: make(map[string]string),
+			cache:             cache,
+			iterativeResolver: NewIterativeResolver(cache),
 		}
 	})
 	return instance
 }
 
-func retrieveIP(url models.URL) (string, error) {
-	resolver := GetInstance()
-	domain := strings.Split(url.Authority.Host, ".")
+func NewResolver(config *models.CacheConfig) *Resolver {
+	cache := NewDNSCache(config)
+	return &Resolver{
+		cache:             cache,
+		iterativeResolver: NewIterativeResolver(cache),
+	}
+}
 
-	if ip, ok := resolver.lookupCache(domain[len(domain)-1]); ok {
+func (r *Resolver) Resolve(domain string, recordType uint16) (string, error) {
+	if domain == "" {
+		return "", ErrInvalidDomain
+	}
+
+	if ip, found := r.cache.Get(domain); found {
 		return ip, nil
 	}
 
-	return "", nil
+	ip, err := r.iterativeResolver.Resolve(domain, recordType)
+	if err != nil {
+		return "", ErrResolutionFailed
+	}
+
+	return ip, nil
+}
+
+func (r *Resolver) ResolveA(domain string) (string, error) {
+	return r.Resolve(domain, protocol.TypeA)
+}
+
+func (r *Resolver) LookupCache(domain string) (string, bool) {
+	return r.cache.Get(domain)
+}
+
+func (r *Resolver) UpdateCache(domain, ip string, ttl int) {
+	r.cache.Set(domain, ip, protocol.ParseTTL(ttl))
+}
+
+func (r *Resolver) GetStats() models.CacheStatistics {
+	return r.cache.GetStats()
+}
+
+func (r *Resolver) ClearCache() {
+	r.cache.Clear()
+}
+
+func (r *Resolver) Close() {
+	r.cache.Close()
+}
+
+func RetrieveIP(url models.URL) (string, error) {
+	resolver := GetInstance()
+	domain := url.Authority.Host
+	return resolver.ResolveA(domain)
 }
