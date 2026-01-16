@@ -57,3 +57,14 @@ func (m *RootServerManager) GetFirstRoot() *NameServer {
 	}
 	return nil 
 }
+
+func (m *RootServerManager) LookUpByName(name string) *NameServer {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	server, found := m.nameToServer[name]
+	if found {
+		return server
+	}
+	return nil
+}
