@@ -48,7 +48,7 @@ func (m *RootServerManager) LookUpByIP(ip string) (*NameServer, bool) {
 	return server, found
 }
 
-func (m *RootServerManager) GetFirstRoot(ip string) *NameServer {
+func (m *RootServerManager) GetFirstRoot() *NameServer {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
