@@ -35,8 +35,8 @@ type Config struct {
 func DefaultConfig() *Config {
 	return &Config{
 		// Server settings
-		UDPPort: 53,
-		TCPPort: 53,
+		UDPPort: 8053,
+		TCPPort: 8053,
 		Host:    "0.0.0.0",
 
 		// Timeouts
